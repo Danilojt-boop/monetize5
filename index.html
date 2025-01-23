@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro e Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        .container h1 {
+            margin-bottom: 20px;
+        }
+        .container input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .container button {
+            width: 95%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .container button:hover {
+            background-color: #0056b3;
+        }
+        .container .link {
+            margin-top: 10px;
+        }
+        .container .link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .container .link a:hover {
+            text-decoration: underline;
+        }
+        .main {
+            position: relative;
+            text-align: center;
+            font-size: 20px;
+        }
+        .coins {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            color: #555;
+        }
+        .main button {
+            width: auto;
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .main button:hover {
+            background-color: #218838;
+        }
+        .link-list {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .link-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .link-list li {
+            margin: 10px 0;
+        }
+        .link-list a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .link-list a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Página de Registro -->
+    <div class="container" id="registerPage">
+        <h1>Registrar</h1>
+        <input type="text" id="registerUsername" placeholder="Usuário">
+        <input type="password" id="registerPassword" placeholder="Senha">
+        <button onclick="registerUser()">Cadastrar</button>
+        <div class="link">
+            <p>Já tem uma conta? <a href="#" onclick="showLoginPage()">Login</a></p>
+        </div>
+    </div>
+
+    <!-- Página de Login -->
+    <div class="container" id="loginPage" style="display: none;">
+        <h1>Login</h1>
+        <p>Siga este perfil no TikTok para continuar:</p>
+        <a href="https://www.tiktok.com/@mentecuriosabia?is_from_webapp=1&sender_device=pc" target="_blank">
+            <button>Siga o Perfil</button>
+        </a>
+        <button onclick="confirmFollow()">Já Segui</button>
+        <div id="followMessage" style="color: red; display: none;">Você precisa seguir o perfil para logar!</div>
+        <input type="text" id="loginUsername" placeholder="Usuário" disabled>
+        <input type="password" id="loginPassword" placeholder="Senha" disabled>
+        <button onclick="loginUser()" disabled id="loginButton">Logar</button>
+    </div>
+
+    <!-- Página Principal -->
+    <div class="main" id="mainPage" style="display: none;">
+        <div class="coins" id="coinBalance">Saldo: 0 moedas</div>
+        <h1>Bem-vindo(a)!</h1>
+        <p>Essa é a página principal.</p>
+        <button onclick="addTikTokLink()">Adicionar Link</button>
+        <button onclick="watchTikTokVideo()">Assistir Vídeo do TikTok</button>
+        <div class="link-list" id="linkList" style="display: none;">
+            <h3>Links de Vídeos Adicionados:</h3>
+            <ul id="links"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Função para salvar e recuperar usuários no localStorage
+        function saveUsersToStorage(users) {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        function getUsersFromStorage() {
+            const users = localStorage.getItem('users');
+            return users ? JSON.parse(users) : {};
+        }
+
+        // Função para salvar e recuperar links no localStorage
+        function saveLinksToStorage(links) {
+            localStorage.setItem('sharedLinks', JSON.stringify(links));
+        }
+
+        function getLinksFromStorage() {
+            const links = localStorage.getItem('sharedLinks');
+            return links ? JSON.parse(links) : [];
+        }
+
+        let users = getUsersFromStorage();
+        let links = getLinksFromStorage();
+        let currentUser = null;
+        let hasFollowed = false;
+
+        function registerUser() {
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            if (username && password) {
+                if (users[username]) {
+                    alert('Usuário já registrado!');
+                } else {
+                    users[username] = { password, coins: 50 };
+                    saveUsersToStorage(users);
+                    alert('Usuário registrado com sucesso! Você ganhou 50 moedas!');
+                    showLoginPage();
+                }
+            } else {
+                alert('Por favor, preencha todos os campos.');
+            }
+        }
+
+        function confirmFollow() {
+            hasFollowed = true;
+            document.getElementById('loginUsername').disabled = false;
+            document.getElementById('loginPassword').disabled = false;
+            document.getElementById('loginButton').disabled = false;
+            document.getElementById('followMessage').style.display = 'none';
+            alert('Obrigado por seguir o perfil! Agora você pode logar.');
+        }
+
+        function loginUser() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!hasFollowed) {
+                document.getElementById('followMessage').style.display = 'block';
+                return;
+            }
+
+            if (username && password) {
+                if (users[username] && users[username].password === password) {
+                    alert('Login bem-sucedido!');
+                    currentUser = username;
+                    showMainPage(username);
+                } else {
+                    alert('Usuário ou senha incorretos.');
+                }
+            } else {
+                alert('Por favor, preencha todos os campos.');
+            }
+        }
+
+        function showLoginPage() {
+            document.getElementById('registerPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('mainPage').style.display = 'none';
+        }
+
+        function showMainPage(username) {
+            document.getElementById('registerPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainPage').style.display = 'block';
+            updateCoinBalance(username);
+        }
+
+        function updateCoinBalance(username) {
+            document.getElementById('coinBalance').textContent = `Saldo: ${users[username].coins} moedas`;
+        }
+
+        function addTikTokLink() {
+            if (users[currentUser].coins >= 50) {
+                const link = prompt("Insira o link do vídeo do TikTok:");
+                if (link) {
+                    links.push(link);
+                    saveLinksToStorage(links);
+                    alert("Link do TikTok adicionado com sucesso!");
+                    users[currentUser].coins -= 50;
+                    saveUsersToStorage(users);
+                    updateCoinBalance(currentUser);
+                } else {
+                    alert("Nenhum link foi adicionado.");
+                }
+            } else {
+                alert("Você precisa de pelo menos 50 moedas para adicionar um vídeo.");
+            }
+        }
+
+        function watchTikTokVideo() {
+            links = getLinksFromStorage(); // Atualiza a lista de links salvos
+            if (links.length > 0) {
+                const link = links[Math.floor(Math.random() * links.length)];
+                window.open(link, "_blank");
+                users[currentUser].coins += 10;
+                saveUsersToStorage(users);
+                updateCoinBalance(currentUser);
+                alert("Você ganhou 10 moedas por assistir ao vídeo!");
+            } else {
+                alert("Nenhum link do TikTok foi adicionado ainda.");
+            }
+        }
+    </script>
+</body>
+</html>
